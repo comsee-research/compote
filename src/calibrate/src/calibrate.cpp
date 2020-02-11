@@ -14,7 +14,7 @@
 #include <pleno/io/printer.h>
 
 //geometry
-#include <pleno/geometry/camera/mfpc.h>
+#include <pleno/geometry/camera/plenoptic.h>
 #include <pleno/geometry/observation.h>
 
 //detection & calibration
@@ -58,6 +58,21 @@ bool save() {
 	return ret;
 }
 
+void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInfo>& images)
+{
+	images.reserve(cfgs.size());
+	
+	for(const auto& cfg : cfgs)
+	{
+		images.emplace_back(
+			ImageWithInfo{ 
+				cv::imread(cfg.path(), cv::IMREAD_UNCHANGED),
+				cfg.fnumber()
+			}
+		);	
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	PRINT_INFO("========= Multifocus plenoptic camera calibration =========");
@@ -76,17 +91,8 @@ int main(int argc, char* argv[])
 	v::load(config.path.images, cfg_images);
 
 	std::vector<ImageWithInfo> whites;	
-	whites.reserve(cfg_images.whites().size());
+	load(cfg_images.whites(), whites);
 	
-	for(auto& cfg_image : cfg_images.whites())
-	{
-		whites.emplace_back(
-			ImageWithInfo{ 
-				cv::imread(cfg_image.path(), cv::IMREAD_UNCHANGED),
-				cfg_image.fnumber()
-			}
-		);	
-	}
 	DEBUG_ASSERT(
 		((whites.size() != 0u) or ((whites.size() == 0u) and (config.path.features == ""))),
 		"You need to provide white images if no features are given !"
@@ -96,7 +102,7 @@ int main(int argc, char* argv[])
 // 2) Load Camera information from configuration file
 ////////////////////////////////////////////////////////////////////////////////	
 	PRINT_WARN("2) Load Camera information from configuration file");
-	MFPCConfig cfg_camera;
+	PlenopticCameraConfig cfg_camera;
 	v::load(config.path.camera, cfg_camera);
 
 	//2.1) Sensor parameters intialization
@@ -113,7 +119,7 @@ int main(int argc, char* argv[])
 ////////////////////////////////////////////////////////////////////////////////
 // 3) Grid Parameters calibration
 ////////////////////////////////////////////////////////////////////////////////
-#if 0 //OPTIMIZATION
+#if 1 //OPTIMIZATION
 	PRINT_WARN("3) MIA geometry Parameters calibration");
 	//3.1) Compute micro-image centers
 	PRINT_WARN("\t3.1) Compute micro-image centers");
@@ -151,7 +157,9 @@ int main(int argc, char* argv[])
 	InternalParameters params;
 	if(config.path.params == "") //no params available
 	{
-		params = preprocess(whites, mia, sensor.scale());
+		FORCE_GUI(true);
+		params = preprocess(whites, mia, sensor.scale(), cfg_camera.I());
+		FORCE_GUI(false);
 		v::save("params-"+std::to_string(getpid())+".js", v::make_serializable(&params));
 	}
 	else
@@ -169,27 +177,20 @@ int main(int argc, char* argv[])
 	PRINT_WARN("\t5.1) Load checkerboard images from configuration file");
 	
 	std::vector<ImageWithInfo> checkerboards;	
-	checkerboards.reserve(cfg_images.checkerboards().size());
+	load(cfg_images.checkerboards(), checkerboards);
 	
-	for(auto& cfg_image : cfg_images.checkerboards())
-	{
-		checkerboards.emplace_back(
-			ImageWithInfo{ 
-				cv::imread(cfg_image.path(), cv::IMREAD_UNCHANGED),
-				cfg_image.fnumber()
-			}
-		);	
-	}	
 	const double cbfnbr = checkerboards[0].fnumber;	
 	for (const auto& [ _ , fnumber] : checkerboards)
+	{
 		DEBUG_ASSERT((cbfnbr == fnumber), "All checkerboard images should have the same aperture configuration");
-	
+	}
 	//5.2) Load white image corresponding to the aperture (mask)
 	PRINT_WARN("\t5.2) Load white image corresponding to the aperture mask");
 	const auto [mask, mfnbr] = ImageWithInfo{ 
 				cv::imread(cfg_images.mask().path(), cv::IMREAD_UNCHANGED),
 				cfg_images.mask().fnumber()
 			};
+			
 	DEBUG_ASSERT((mfnbr == cbfnbr), "No corresponding f-number between mask and images");
 
 	BAPObservations bap_obs;
@@ -240,12 +241,11 @@ int main(int argc, char* argv[])
 			++f;
 			PRINT_INFO(std::endl);
 			clear();
-		}
-
-Viewer::enable(false);		
+		}	
 		//5.4) Computing MIC Features
 		PRINT_WARN("\t5.4) Computing MIC Features");
 		center_obs = detection_mic(whites[1].img);
+		
 #if 1 //SAVE CENTERS OBSERVATIONS
 {
 	ObservationsConfig cfg_obs;
@@ -271,8 +271,8 @@ Viewer::enable(false);
 		ObservationsConfig cfg_obs;
 		v::load(config.path.features, cfg_obs);
 
-		bap_obs = cfg_obs.features();
-		center_obs = cfg_obs.centers();
+		bap_obs = cfg_obs.features(); DEBUG_VAR(bap_obs.size());
+		center_obs = cfg_obs.centers(); DEBUG_VAR(center_obs.size());
 		
 		DEBUG_ASSERT(
 			((bap_obs.size() > 0u) and (center_obs.size() > 0u)), 
@@ -288,7 +288,10 @@ Viewer::enable(false);
 	PRINT_WARN("\t6.1) Loading Scene Model");
 	SceneConfig cfg_scene;
 	v::load(config.path.scene, cfg_scene);
-	assert(cfg_scene.checkerboards().size() > 0u);
+	DEBUG_ASSERT(
+		(cfg_scene.checkerboards().size() > 0u),
+		"No model available while loading scene"
+	);
 	
 	CheckerBoard scene{cfg_scene.checkerboards()[0]};
 			
@@ -308,20 +311,21 @@ Viewer::enable(false);
 	);	
 	
 	PRINT_WARN("\t6.2) Computing Initial Model");
-	MultiFocusPlenopticCamera mfpc;
+	PlenopticCamera mfpc;
 	{
 		const double F = cfg_camera.main_lens().f();
 		const double N = cfg_camera.main_lens().aperture();
 		const double h = cfg_camera.dist_focus();
 		
-		mfpc.init(sensor, mia, params, F, N, h, MultiFocusPlenopticCamera::Mode::Keplerian) ;
+		mfpc.init(sensor, mia, params, F, N, h, PlenopticCamera::Mode::Keplerian) ;
 	}
 	PRINT_INFO("=== Initial Camera Parameters " << std::endl << "MFPC = " << mfpc);
 
-	PRINT_WARN("\t6.3) Calibrate");
+	PRINT_WARN("\t6.3) Calibrate");	
 	CalibrationPoses poses;
-	calibration_MFPC<false>(poses, mfpc, scene, bap_obs, center_obs, pictures);
 	
+	calibration_PlenopticCamera(poses, mfpc, scene, bap_obs, center_obs, pictures);
+
 	PRINT_WARN("\t6.4) Save Calibration Parameters");
 	DEBUG_VAR(mfpc);
 	if(save()) 

@@ -44,3 +44,8 @@
 *.swp
 
 datasets/
+script/
+
+*.csv
+*.js
+*.sh

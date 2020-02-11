@@ -14,6 +14,9 @@ if [ -f "../${dataset}/params.js" ]; then
 	params="../${dataset}/params.js"
 fi
 
+#	--pparams "${params}" \
+#	--features "${features}" \
+
 ./${path}/calibrate \
 	--pcamera "${camera}" \
 	--pimages "../${dataset}/images.js" \
@@ -21,5 +24,6 @@ fi
 	--pparams "${params}" \
 	--gui false \
 	--verbose true -l 15 \
-	--output "../${dataset}/camera_optimized.js"
+	--output "../${dataset}/camera_optimized.js" \
+	--features "${features}"
 
