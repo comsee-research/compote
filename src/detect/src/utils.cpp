@@ -42,7 +42,7 @@ Config_t parse_args(int argc, char *argv[])
 		)
 		("features,f",
 			po::value<std::string>()->default_value("observations.bin.gz"),
-			"Path to saved observations file"
+			"Path to save observations file"
 		);
 
 	po::variables_map vm;

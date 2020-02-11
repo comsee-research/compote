@@ -38,7 +38,7 @@ Config_t parse_args(int argc, char *argv[])
 		)
 		("pparams,p",
 			po::value<std::string>()->default_value("internals.js"),
-			"Path to output camera internal parameters configuration file"
+			"Path to save camera internal parameters configuration file"
 		);
 
 	po::variables_map vm;

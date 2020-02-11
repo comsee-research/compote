@@ -46,15 +46,15 @@ Config_t parse_args(int argc, char *argv[])
 		)
 		("features,f",
 			po::value<std::string>()->default_value(""),
-			"Path to saved observations file"
+			"Path to observations file"
 		)
 		("extrinsics,e",
-			po::value<std::string>()->default_value(""),
-			"Path to saved extrinsics parameters file"
+			po::value<std::string>()->default_value("extrinsics.js"),
+			"Path to save extrinsics parameters file"
 		)
 		("output,o",
-			po::value<std::string>()->default_value("optimized.js"),
-			"Output Camera Optimized Parameters file"
+			po::value<std::string>()->default_value("intrinsics.js"),
+			"Path to save intrinsics parameters file"
 		);
 
 	po::variables_map vm;

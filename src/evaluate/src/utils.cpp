@@ -46,10 +46,10 @@ Config_t parse_args(int argc, char *argv[])
 		)
 		("features,f",
 			po::value<std::string>()->default_value(""),
-			"Path to saved observations file"
+			"Path to observations file"
 		)
 		("extrinsics,e",
-			po::value<std::string>()->default_value(""),
+			po::value<std::string>()->default_value("extrinsics.js"),
 			"Path to saved extrinsics parameters file"
 		);
 
