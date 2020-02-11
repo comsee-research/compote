@@ -82,8 +82,9 @@ int main(int argc, char* argv[])
 	
 	Printer::verbose(config.verbose);
 	Printer::level(config.level);
-
-//1) Load Camera information from configuration file
+////////////////////////////////////////////////////////////////////////////////	
+// 1) Load Camera information from configuration file
+////////////////////////////////////////////////////////////////////////////////	
 	PRINT_WARN("1) Load Camera information from configuration file");
 	PlenopticCamera mfpc;
 	load(config.path.camera, mfpc);
@@ -92,7 +93,9 @@ int main(int argc, char* argv[])
 	v::load(config.path.params, v::make_serializable(&params));
 	mfpc.params() = params;
 	
-//2) Load images from configuration file
+////////////////////////////////////////////////////////////////////////////////		
+// 2) Load images from configuration file
+////////////////////////////////////////////////////////////////////////////////	
 	PRINT_WARN("2) Load images from configuration file");
 	PRINT_WARN("\t2.1) Load white image corresponding to the aperture mask");
 	ImagesConfig cfg_images;
@@ -106,15 +109,19 @@ int main(int argc, char* argv[])
 	PRINT_WARN("\t2.2) Load checkerboard images");
 	std::vector<ImageWithInfo> checkerboards;	
 	load(cfg_images.checkerboards(), checkerboards);
-	
-//3) Loading Features
+
+////////////////////////////////////////////////////////////////////////////////	
+// 3) Loading Features
+////////////////////////////////////////////////////////////////////////////////	
 	PRINT_WARN("3) Loading BAP Features");
 	ObservationsConfig cfg_obs;
 	v::load(config.path.features, cfg_obs);
 		
 	BAPObservations bap_obs = cfg_obs.features();
-	
-//4) Starting Evaluation of the MutliFocus Plenoptic Camera Calibration
+
+////////////////////////////////////////////////////////////////////////////////	
+// 4) Starting Evaluation of the MutliFocus Plenoptic Camera Calibration
+////////////////////////////////////////////////////////////////////////////////	
 	PRINT_WARN("4) Starting Evaluation of the MutliFocus Plenoptic Camera Calibration");
 	//4.1) Loading Scene Model
 	PRINT_WARN("\t4.1) Loading Scene Model");
@@ -157,7 +164,7 @@ int main(int argc, char* argv[])
 			++i;
 		}
 		
-		v::save( config.path.extrinsics, cfg_poses );
+		v::save(config.path.extrinsics, cfg_poses );
 	}
 	
 	PRINT_INFO("========= EOF =========");
