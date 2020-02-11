@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 	PRINT_WARN("\t3.2) MIA geometry parameters calibration");
     calibration_MIA(mia, mic_obs);
    
-    PRINT_DEBUG("Optimized MIA geometry parameters = \n" << mia);
+    PRINT_INFO("Optimized MIA geometry parameters = \n" << mia);
     RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()++).pen_color(v::green).pen_width(5).name("main:optimizedgrid(green)"), mia);
 	clear();	
 
@@ -153,6 +153,20 @@ FORCE_GUI(false);
 
 	PRINT_INFO("Internal Parameters = " << params << std::endl);
 	clear();
+		
+	if(save())
+	{
+		PRINT_WARN("5) Saving camera parameters");
+		PlenopticCamera mfpc;
+		{
+			const double F = cfg_camera.main_lens().f();
+			const double N = cfg_camera.main_lens().aperture();
+			const double h = cfg_camera.dist_focus();
+			
+			mfpc.init(sensor, mia, params, F, N, h, PlenopticCamera::Mode::Keplerian) ;
+		}
+		save("camera-"+std::to_string(getpid())+".js", mfpc);
+	}
 	
 	PRINT_INFO("========= EOF =========");
 
