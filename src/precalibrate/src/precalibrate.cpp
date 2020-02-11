@@ -1,0 +1,163 @@
+//STD
+#include <iostream>
+#include <unistd.h>
+//EIGEN
+//BOOST
+//OPENCV
+#include <opencv2/opencv.hpp>
+
+//LIBPLENO
+#include <pleno/types.h>
+
+#include <pleno/graphic/gui.h>
+#include <pleno/graphic/viewer_2d.h>
+#include <pleno/io/printer.h>
+
+//geometry
+#include <pleno/geometry/camera/plenoptic.h>
+#include <pleno/geometry/observation.h>
+
+//detection & calibration
+#include <pleno/processing/detection/detection.h>
+#include <pleno/processing/calibration/calibration.h>
+
+//tools
+#include <pleno/processing/preprocess.h> 
+
+//config
+#include <pleno/io/cfg/images.h>
+#include <pleno/io/cfg/camera.h>
+
+#include "utils.h"
+
+void clear() {
+	GUI(
+		PRINT_WARN("Clear viewer ? [y/n]");
+		char c;
+		std::cin >> c;
+		if(c == 'y') {Viewer::clear(); PRINT_DEBUG("Cleared !"); }	
+		std::cin.clear();
+		while (std::cin.get() != '\n');
+	);
+}
+
+bool save() {
+	bool ret = false;
+	if(Printer::level() bitand Printer::Level::WARN)
+	{
+		PRINT_WARN("Save ? [y/n]");
+		char c;
+		std::cin >> c;
+		if(c == 'y') { ret = true; }	
+		std::cin.clear();
+		while (std::cin.get() != '\n');
+	}
+	return ret;
+}
+
+void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInfo>& images)
+{
+	images.reserve(cfgs.size());
+	
+	for(const auto& cfg : cfgs)
+	{
+		images.emplace_back(
+			ImageWithInfo{ 
+				cv::imread(cfg.path(), cv::IMREAD_UNCHANGED),
+				cfg.fnumber()
+			}
+		);	
+	}
+}
+
+int main(int argc, char* argv[])
+{
+	PRINT_INFO("========= Multifocus plenoptic camera pre-calibration =========");
+	Config_t config = parse_args(argc, argv);
+	
+	Viewer::enable(config.use_gui); DEBUG_VAR(Viewer::enable());
+	
+	Printer::verbose(config.verbose); DEBUG_VAR(Printer::verbose());
+	Printer::level(config.level); DEBUG_VAR(Printer::level());
+
+////////////////////////////////////////////////////////////////////////////////
+// 1) Load white images from configuration file
+////////////////////////////////////////////////////////////////////////////////
+	PRINT_WARN("1) Load white images from configuration file");
+	ImagesConfig cfg_images;
+	v::load(config.path.images, cfg_images);
+
+	std::vector<ImageWithInfo> whites;	
+	load(cfg_images.whites(), whites);
+	
+	DEBUG_ASSERT((whites.size() != 0u), "You need to provide white images if no features are given !");
+	
+////////////////////////////////////////////////////////////////////////////////
+// 2) Load Camera information from configuration file
+////////////////////////////////////////////////////////////////////////////////	
+	PRINT_WARN("2) Load Camera information from configuration file");
+	PlenopticCameraConfig cfg_camera;
+	v::load(config.path.camera, cfg_camera);
+
+	//2.1) Sensor parameters intialization
+    PRINT_WARN("\t2.1) Sensor parameters intialization");
+	Sensor sensor{cfg_camera.sensor()};
+	
+	//2.2) Grid parameters initialization
+	PRINT_WARN("\t2.2) MIA geometry parameters initialization");
+    MIA mia{cfg_camera.mia()};
+
+	PRINT_DEBUG("Initial MIA geometry parameters:\n" << mia);
+    RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()++).pen_color(v::purple).pen_width(5).name("main:initialgrid(purple)"), mia);
+    
+////////////////////////////////////////////////////////////////////////////////
+// 3) Grid Parameters calibration
+////////////////////////////////////////////////////////////////////////////////
+	PRINT_WARN("3) MIA geometry Parameters calibration");
+	//3.1) Compute micro-image centers
+	PRINT_WARN("\t3.1) Compute micro-image centers");
+	MICObservations mic_obs;
+	
+	for(const auto& [img, fnumber] : whites)
+	{
+		if(fnumber <= 4.) continue; //micro-images are overlapping
+		PRINT_INFO("=== Computing MIC in image f/" << fnumber);
+		MICObservations obs = detection_mic(img);
+		mic_obs.insert(std::end(mic_obs), std::begin(obs), std::end(obs));
+	
+		GUI(
+			RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()++).name("main:white_image_f/"+std::to_string(fnumber)), img);
+			for (const auto& o : obs)
+				RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()).name("main:observations(blue)").pen_color(v::blue).pen_width(5), P2D{o[0], o[1]});    
+			Viewer::update();
+		);
+    }	
+	//3.2) Optimization
+	PRINT_WARN("\t3.2) MIA geometry parameters calibration");
+    calibration_MIA(mia, mic_obs);
+   
+    PRINT_DEBUG("Optimized MIA geometry parameters = \n" << mia);
+    RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()++).pen_color(v::green).pen_width(5).name("main:optimizedgrid(green)"), mia);
+	clear();	
+
+////////////////////////////////////////////////////////////////////////////////
+// 4) Preprocess white images and Set internal parameters
+////////////////////////////////////////////////////////////////////////////////
+	PRINT_WARN("4) Preprocessing white images and Computing internal parameters");
+	InternalParameters params;
+
+FORCE_GUI(true);
+	params = preprocess(whites, mia, sensor.scale(), cfg_camera.I());
+FORCE_GUI(false);
+	v::save(config.path.params, v::make_serializable(&params));
+
+	PRINT_INFO("Internal Parameters = " << params << std::endl);
+	clear();
+	
+	PRINT_INFO("========= EOF =========");
+
+	Viewer::wait();
+	Viewer::stop();
+	return 0;
+}
+

@@ -8,5 +8,6 @@ message("${PROJECT_NAME}")
 message("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 
 add_subdirectory(src/calibrate)
+add_subdirectory(src/precalibrate)
 
 
