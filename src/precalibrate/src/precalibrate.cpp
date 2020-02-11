@@ -30,6 +30,8 @@
 
 #include "utils.h"
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void clear() {
 	GUI(
 		PRINT_WARN("Clear viewer ? [y/n]");
@@ -69,7 +71,8 @@ void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInf
 		);	
 	}
 }
-
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char* argv[])
 {
 	PRINT_INFO("========= Multifocus plenoptic camera pre-calibration =========");
@@ -106,10 +109,7 @@ int main(int argc, char* argv[])
 	//2.2) Grid parameters initialization
 	PRINT_WARN("\t2.2) MIA geometry parameters initialization");
     MIA mia{cfg_camera.mia()};
-
-	PRINT_DEBUG("Initial MIA geometry parameters:\n" << mia);
-    RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()++).pen_color(v::purple).pen_width(5).name("main:initialgrid(purple)"), mia);
-    
+        
 ////////////////////////////////////////////////////////////////////////////////
 // 3) Grid Parameters calibration
 ////////////////////////////////////////////////////////////////////////////////
