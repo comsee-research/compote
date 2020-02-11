@@ -10,5 +10,6 @@ message("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 add_subdirectory(src/calibrate)
 add_subdirectory(src/precalibrate)
 add_subdirectory(src/detect)
+add_subdirectory(src/evaluate)
 
 
