@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 2.8)
 get_filename_component(ProjectId ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 project(${ProjectId})
 
-message("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+message("-----------------------------------------------------------------------------------------")
 message("${PROJECT_NAME}")
-message("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+message("-----------------------------------------------------------------------------------------")
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -27,7 +27,7 @@ set(MULTIFOCUS_INCDIRS "src")
 ##SOURCES
 set(MULTIFOCUS_SRCS 
 	src/utils.cpp
-	src/calibrate
+	src/calibrate.cpp
 )
 
 message(${LIBPLENO_LIBRARIES})
