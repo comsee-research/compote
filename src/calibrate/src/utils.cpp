@@ -80,7 +80,7 @@ Config_t parse_args(int argc, char *argv[])
 	}
 	
 	//check mandatory parameters
-	if(	vm["pimages"].as<std::string>() == "" 
+	if(	(vm["pimages"].as<std::string>() == "" and vm["features"].as<std::string>() == "")
 		or vm["pcamera"].as<std::string>() == ""
 		or vm["pscene"].as<std::string>() == ""
 	)

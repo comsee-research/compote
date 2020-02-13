@@ -21,14 +21,19 @@ The COMPOTE applications have a light dependency list:
 and was compiled on:
  * Ubuntu 18.04.4 LTS.
   
-### Compilation 
+### Compilation & Test
 
-If you are comfortable with Linux and CMake and have already installed the prerequisites above, the following commands should install libpleno on your system.
+If you are comfortable with Linux and CMake and have already installed the prerequisites above, the following commands should compile the applications on your system.
 
 ```
 mkdir build && cd build
 cmake ..
 make -j6
+```
+
+To test the `calibrate` application you can use the example script from the build directory:
+```
+./../example/calib.sh
 ```
 
 Applications
@@ -109,7 +114,7 @@ If you use COMPOTE or [libpleno] in an academic context, please cite the followi
 License
 =======
 
-COMPTE is licensed under the GNU General Public License v3.0. Enjoy!
+COMPOTE is licensed under the GNU General Public License v3.0. Enjoy!
 
 [Ubuntu]: http://www.ubuntu.com
 [CMake]: http://www.cmake.org

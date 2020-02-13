@@ -87,38 +87,48 @@ int main(int argc, char* argv[])
 ////////////////////////////////////////////////////////////////////////////////
 // 1) Load Images from configuration file
 ////////////////////////////////////////////////////////////////////////////////
-	PRINT_WARN("1) Load Images from configuration file");
-	ImagesConfig cfg_images;
-	v::load(config.path.images, cfg_images);
+	std::vector<ImageWithInfo> whites, checkerboards;
+	Image mask;
 	
-	//1.1) Load whites images
-    PRINT_WARN("\t1.1) Load whites images");
-	std::vector<ImageWithInfo> whites;	
-	load(cfg_images.whites(), whites);
-	
-	DEBUG_ASSERT((whites.size() != 0u),	"You need to provide white images!");
-	
-	//1.2) Load checkerboard images
-	PRINT_WARN("\t1.2) Load checkerboard images");	
-	std::vector<ImageWithInfo> checkerboards;	
-	load(cfg_images.checkerboards(), checkerboards);
-	
-	DEBUG_ASSERT((checkerboards.size() != 0u),	"You need to provide checkerboard images!");
-	
-	const double cbfnbr = checkerboards[0].fnumber;	
-	for (const auto& [ _ , fnumber] : checkerboards)
+	if (config.path.images == "" and not(config.path.features == ""))
 	{
-		DEBUG_ASSERT((cbfnbr == fnumber), "All checkerboard images should have the same aperture configuration");
+		PRINT_WARN("1) No images loaded");
 	}
-	
-	//1.3) Load white image corresponding to the aperture (mask)
-	PRINT_WARN("\t1.3) Load white image corresponding to the aperture (mask)");
-	const auto [mask, mfnbr] = ImageWithInfo{ 
-				cv::imread(cfg_images.mask().path(), cv::IMREAD_UNCHANGED),
-				cfg_images.mask().fnumber()
-			};
-	DEBUG_ASSERT((mfnbr == cbfnbr), "No corresponding f-number between mask and images");
-	
+	else
+	{
+		PRINT_WARN("1) Load Images from configuration file");
+		ImagesConfig cfg_images;
+		v::load(config.path.images, cfg_images);
+		
+		//1.1) Load whites images
+		PRINT_WARN("\t1.1) Load whites images");
+		//std::vector<ImageWithInfo> whites;	
+		load(cfg_images.whites(), whites);
+		
+		DEBUG_ASSERT((whites.size() != 0u),	"You need to provide white images!");
+		
+		//1.2) Load checkerboard images
+		PRINT_WARN("\t1.2) Load checkerboard images");	
+		//std::vector<ImageWithInfo> checkerboards;	
+		load(cfg_images.checkerboards(), checkerboards);
+		
+		DEBUG_ASSERT((checkerboards.size() != 0u),	"You need to provide checkerboard images!");
+		
+		const double cbfnbr = checkerboards[0].fnumber;	
+		for (const auto& [ _ , fnumber] : checkerboards)
+		{
+			DEBUG_ASSERT((cbfnbr == fnumber), "All checkerboard images should have the same aperture configuration");
+		}
+		
+		//1.3) Load white image corresponding to the aperture (mask)
+		PRINT_WARN("\t1.3) Load white image corresponding to the aperture (mask)");
+		const auto [mask_, mfnbr] = ImageWithInfo{ 
+					cv::imread(cfg_images.mask().path(), cv::IMREAD_UNCHANGED),
+					cfg_images.mask().fnumber()
+				};
+		mask = mask_;
+		DEBUG_ASSERT((mfnbr == cbfnbr), "No corresponding f-number between mask and images");
+	}
 ////////////////////////////////////////////////////////////////////////////////
 // 2) Load Camera information from configuration file
 ////////////////////////////////////////////////////////////////////////////////	
