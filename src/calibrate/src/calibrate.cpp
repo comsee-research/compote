@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
 
 		PRINT_WARN("3) Pre-calibration: Preprocessing white images and Computing internal parameters");
 		FORCE_GUI(true);
-		params = preprocess(whites, mia, sensor.scale(), cfg_camera.I());
+		params = preprocess(whites, mia, sensor.scale(), cfg_camera.I(), cfg_camera.mode());
 		FORCE_GUI(false);
 		v::save("params-"+std::to_string(getpid())+".js", v::make_serializable(&params));
 	}
@@ -298,8 +298,9 @@ int main(int argc, char* argv[])
 		const double F = cfg_camera.main_lens().f();
 		const double N = cfg_camera.main_lens().aperture();
 		const double h = cfg_camera.dist_focus();
+		const PlenopticCamera::Mode mode = (cfg_camera.mode() != -1) ? PlenopticCamera::Mode(cfg_camera.mode()) : PlenopticCamera::Mode::Galilean;
 		
-		mfpc.init(sensor, mia, params, F, N, h, PlenopticCamera::Mode::Keplerian) ;
+		mfpc.init(sensor, mia, params, F, N, h, mode);
 	}
 	PRINT_INFO("=== Initial Camera Parameters " << std::endl << "MFPC = " << mfpc);
 

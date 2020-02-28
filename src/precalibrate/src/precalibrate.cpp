@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 	InternalParameters params;
 
 FORCE_GUI(true);
-	params = preprocess(whites, mia, sensor.scale(), cfg_camera.I());
+	params = preprocess(whites, mia, sensor.scale(), cfg_camera.I(), cfg_camera.mode());
 FORCE_GUI(false);
 	v::save(config.path.params, v::make_serializable(&params));
 
