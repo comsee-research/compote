@@ -105,7 +105,7 @@ If you use COMPOTE or [libpleno] in an academic context, please cite the followi
 
 	@inproceedings{Labussiere2020,
 		author = {Labussi{\`{e}}re, Mathieu and Teuli{\`{e}}re, C{\'{e}}line and Bernardin, Fr{\'{e}}d{\'{e}}ric and Ait-Aider, Omar},
-		booktitle = {submitted to Proceedings of the IEEE Computer Society Conference on Computer Vision and Pattern Recognition},
+		booktitle = {Proceedings of the IEEE Computer Society Conference on Computer Vision and Pattern Recognition},
 		title = {{Blur Aware Calibration of Multi-Focus Plenoptic Camera}},
 		year = {2020}
 	}
