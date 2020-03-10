@@ -96,7 +96,7 @@ COMPOTE also provides two applications to run stats evaluation on the optimized 
 Datasets
 ========
 
-Datasets R12-A, R12-B and R12-C can be downloaded [here](https://drive.uca.fr/f/d3a73cb1926047a8b635/?dl=1).
+Datasets R12-A, R12-B and R12-C can be downloaded [from here](https://github.com/comsee-research/plenoptic-datasets).
 
 Citing
 ======
@@ -105,7 +105,7 @@ If you use COMPOTE or [libpleno] in an academic context, please cite the followi
 
 	@inproceedings{Labussiere2020,
 		author = {Labussi{\`{e}}re, Mathieu and Teuli{\`{e}}re, C{\'{e}}line and Bernardin, Fr{\'{e}}d{\'{e}}ric and Ait-Aider, Omar},
-		booktitle = {Proceedings of the IEEE Computer Society Conference on Computer Vision and Pattern Recognition},
+		booktitle = {2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
 		title = {{Blur Aware Calibration of Multi-Focus Plenoptic Camera}},
 		year = {2020}
 	}
@@ -126,6 +126,6 @@ COMPOTE is licensed under the GNU General Public License v3.0. Enjoy!
 [OpenCV]: https://opencv.org/
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/
 [boost]: http://www.boost.org/
-[libpleno]: http://gitlab.ip.uca.fr/mla-dev/libpleno
+[libpleno]: https://github.com/comsee-research/libpleno
 
 ---
