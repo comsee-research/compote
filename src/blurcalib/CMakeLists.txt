@@ -22,18 +22,12 @@ set(MULTIFOCUS_LIBS
 )
 
 ##INCLUDE DIRECTORIES
-set(MULTIFOCUS_INCDIRS "src" "src/optimization" "src/processing")
+set(MULTIFOCUS_INCDIRS "src")
 
 ##SOURCES
 set(MULTIFOCUS_SRCS 
 	src/utils.cpp
 	src/blurcalib.cpp
-	##
-	src/optimization/kappa.cpp
-	src/optimization/errors/blur.cpp
-	##
-	src/processing/calibration/blur.cpp
-	
 )
 
 message(${LIBPLENO_LIBRARIES})

@@ -8,7 +8,6 @@
 
 //LIBPLENO
 #include <pleno/types.h>
-#include "types.h"
 
 #include <pleno/graphic/gui.h>
 #include <pleno/io/printer.h>
@@ -18,7 +17,6 @@
 
 //detection & calibration
 #include <pleno/processing/calibration/calibration.h>
-#include "processing/calibration/calibration.h"
 
 //tools
 #include <pleno/processing/improcess.h> //devignetting
