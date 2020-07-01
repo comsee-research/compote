@@ -9,7 +9,7 @@ struct RelativeBlurCostError
 {		
 	using ErrorType = Eigen::Matrix<double, 1, 1>; //SAD
 	
-	//The ref image is more in-focus than edi image
+	//The ref image is more out-of-focus than edi image
 	const Image ref; 
 	const Image edi; //equally defocused image
 		

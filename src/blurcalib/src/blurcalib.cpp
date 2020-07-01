@@ -123,7 +123,6 @@ int main(int argc, char* argv[])
 	v::load(config.path.params, v::make_serializable(&params));
 
 	PRINT_INFO("Internal Parameters = " << params << std::endl);
-	clear();
 
 ////////////////////////////////////////////////////////////////////////////////
 // 3) Features extraction step
@@ -145,8 +144,8 @@ int main(int argc, char* argv[])
 ////////////////////////////////////////////////////////////////////////////////
 // 4) Starting Calibration of the Relative blur Radius
 ////////////////////////////////////////////////////////////////////////////////	
-	PRINT_WARN("5) Starting Calibration of the Relative blur Radius");
-	PRINT_WARN("\t5.1) Devignetting images");
+	PRINT_WARN("4) Starting Calibration of the Relative blur Radius");
+	PRINT_WARN("\t4.1) Devignetting images");
 			
 	std::vector<Image> pictures;
 	pictures.reserve(checkerboards.size());
@@ -163,8 +162,14 @@ int main(int argc, char* argv[])
 		}	
 	);	
 
-	PRINT_WARN("\t5.2) Calibrate");	
+	PRINT_WARN("\t4.2) Calibrate");	
 	calibration_relativeBlur(params, bap_obs, pictures);
+	
+	if(save())
+	{
+		PRINT_WARN("5) Saving internals parameters");
+		v::save("params-"+std::to_string(getpid())+".js", v::make_serializable(&params));
+	}
 	
 	PRINT_INFO("========= EOF =========");
 
