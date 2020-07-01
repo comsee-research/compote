@@ -91,7 +91,12 @@ For instance to run calibration:
 COMPOTE also provides two applications to run stats evaluation on the optimized poses optained with a constant step linear translation along the _z_-axis:
  * `linear_evaluation` gives the absolute errors (mean + std) and the relative errors (mean + std) of translation of the optimized poses,
  * `linear_raytrix_evaluation` takes `.xyz` pointcloud obtained by _Raytrix_ calibration software and gives the absolute errors (mean + std) and the relative errors (mean + std) of translation.
- 
+
+### Blur Proportionality Coefficient Calibration
+
+`blurcalib` runs the calibration of the blur proportionality coefficient `kappa` linking the spread parameter of the PSF with the blur radius. It updates the internal parameters with the optimized value of `kappa`.
+
+**Requirements**: computed _internal parameters_, features and images.
   
 Datasets
 ========
@@ -103,11 +108,12 @@ Citing
 
 If you use COMPOTE or [libpleno] in an academic context, please cite the following publication:
 
-	@inproceedings{Labussiere2020,
-		author = {Labussi{\`{e}}re, Mathieu and Teuli{\`{e}}re, C{\'{e}}line and Bernardin, Fr{\'{e}}d{\'{e}}ric and Ait-Aider, Omar},
-		booktitle = {2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-		title = {{Blur Aware Calibration of Multi-Focus Plenoptic Camera}},
-		year = {2020}
+	@inproceedings{labussiere2020blur,
+	  title 	=	{Blur Aware Calibration of Multi-Focus Plenoptic Camera},
+	  author	=	{Labussi{\`e}re, Mathieu and Teuli{\`e}re, C{\'e}line and Bernardin, Fr{\'e}d{\'e}ric and Ait-Aider, Omar},
+	  booktitle	=	{Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+	  pages		=	{2545--2554},
+	  year		=	{2020}
 	}
 
 
