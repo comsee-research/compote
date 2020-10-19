@@ -162,8 +162,9 @@ FORCE_GUI(false);
 			const double F = cfg_camera.main_lens().f();
 			const double N = cfg_camera.main_lens().aperture();
 			const double h = cfg_camera.dist_focus();
+			const int mode = cfg_camera.mode();
 			
-			mfpc.init(sensor, mia, params, F, N, h, PlenopticCamera::Mode::Keplerian) ;
+			mfpc.init(sensor, mia, params, F, N, h, mode);
 		}
 		save("camera-"+std::to_string(getpid())+".js", mfpc);
 	}
