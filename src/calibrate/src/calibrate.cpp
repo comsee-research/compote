@@ -18,11 +18,11 @@
 #include <pleno/geometry/observation.h>
 
 //detection & calibration
+#include <pleno/processing/precalibration/preprocess.h>
 #include <pleno/processing/detection/detection.h>
 #include <pleno/processing/calibration/calibration.h>
 
 //tools
-#include <pleno/processing/preprocess.h> 
 #include <pleno/processing/improcess.h> //devignetting
 
 //config
