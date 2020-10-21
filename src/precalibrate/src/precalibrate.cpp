@@ -62,11 +62,13 @@ void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInf
 	images.reserve(cfgs.size());
 	
 	for(const auto& cfg : cfgs)
-	{
+	{	
+		PRINT_DEBUG("Load image " << cfg.path());
 		images.emplace_back(
 			ImageWithInfo{ 
 				cv::imread(cfg.path(), cv::IMREAD_UNCHANGED),
-				cfg.fnumber()
+				cfg.fnumber(),
+				cfg.frame()
 			}
 		);	
 	}
@@ -118,7 +120,7 @@ int main(int argc, char* argv[])
 	PRINT_WARN("\t3.1) Compute micro-image centers");
 	MICObservations mic_obs;
 	
-	for(const auto& [img, fnumber] : whites)
+	for(const auto& [img, fnumber, __] : whites)
 	{
 		if(fnumber <= 4.) continue; //micro-images are overlapping
 		PRINT_INFO("=== Computing MIC in image f/" << fnumber);
@@ -162,7 +164,7 @@ FORCE_GUI(false);
 			const double F = cfg_camera.main_lens().f();
 			const double N = cfg_camera.main_lens().aperture();
 			const double h = cfg_camera.dist_focus();
-			const int mode = cfg_camera.mode();
+			const PlenopticCamera::Mode mode = (cfg_camera.mode() != -1) ? PlenopticCamera::Mode(cfg_camera.mode()) : PlenopticCamera::Mode::Galilean;
 			
 			mfpc.init(sensor, mia, params, F, N, h, mode);
 		}

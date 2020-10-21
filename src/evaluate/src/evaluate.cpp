@@ -64,10 +64,12 @@ void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInf
 	
 	for(const auto& cfg : cfgs)
 	{
+		PRINT_DEBUG("Load image " << cfg.path());
 		images.emplace_back(
 			ImageWithInfo{ 
 				cv::imread(cfg.path(), cv::IMREAD_UNCHANGED),
-				cfg.fnumber()
+				cfg.fnumber(),
+				cfg.frame()
 			}
 		);	
 	}
@@ -101,7 +103,7 @@ int main(int argc, char* argv[])
 	ImagesConfig cfg_images;
 	v::load(config.path.images, cfg_images);
 	
-	const auto [mask, mfnbr] = ImageWithInfo{ 
+	const auto [mask, mfnbr, __] = ImageWithInfo{ 
 				cv::imread(cfg_images.mask().path(), cv::IMREAD_UNCHANGED),
 				cfg_images.mask().fnumber()
 			};

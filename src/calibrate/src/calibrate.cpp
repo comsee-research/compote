@@ -65,10 +65,12 @@ void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInf
 	
 	for(const auto& cfg : cfgs)
 	{
+		PRINT_DEBUG("Load image " << cfg.path());
 		images.emplace_back(
 			ImageWithInfo{ 
 				cv::imread(cfg.path(), cv::IMREAD_UNCHANGED),
-				cfg.fnumber()
+				cfg.fnumber(),
+				cfg.frame()
 			}
 		);	
 	}
@@ -115,14 +117,14 @@ int main(int argc, char* argv[])
 		DEBUG_ASSERT((checkerboards.size() != 0u),	"You need to provide checkerboard images!");
 		
 		const double cbfnbr = checkerboards[0].fnumber;	
-		for (const auto& [ _ , fnumber] : checkerboards)
+		for (const auto& [ _ , fnumber, __ ] : checkerboards)
 		{
 			DEBUG_ASSERT((cbfnbr == fnumber), "All checkerboard images should have the same aperture configuration");
 		}
 		
 		//1.3) Load white image corresponding to the aperture (mask)
 		PRINT_WARN("\t1.3) Load white image corresponding to the aperture (mask)");
-		const auto [mask_, mfnbr] = ImageWithInfo{ 
+		const auto [mask_, mfnbr, __ ] = ImageWithInfo{ 
 					cv::imread(cfg_images.mask().path(), cv::IMREAD_UNCHANGED),
 					cfg_images.mask().fnumber()
 				};
@@ -158,7 +160,7 @@ int main(int argc, char* argv[])
 		PRINT_WARN("\t3.1) Compute micro-image centers");
 		MICObservations mic_obs;
 		
-		for(const auto& [img, fnumber] : whites)
+		for(const auto& [img, fnumber, __] : whites)
 		{
 			if(fnumber <= 4.) continue; //micro-images are overlapping
 			PRINT_INFO("=== Computing MIC in image f/" << fnumber);
@@ -206,8 +208,8 @@ int main(int argc, char* argv[])
 		//4.1) For each frame detect corners
 		PRINT_WARN("\t4.1) Computing BAP Features");
 		std::size_t f = 0;
-		for (const auto& [ img, _ ] : checkerboards)
-		{		
+		for (const auto& [ img, _, frame ] : checkerboards)
+		{					
 			PRINT_INFO("=== Devignetting image frame f = " << f);
 			Image unvignetted;
 			devignetting(img, mask, unvignetted);
@@ -326,7 +328,7 @@ int main(int argc, char* argv[])
 			++i;
 		}
 		
-		v::save(config.path.extrinsics, cfg_poses );
+		v::save(config.path.extrinsics, cfg_poses);
 	}
 	
 	PRINT_INFO("========= EOF =========");
