@@ -37,9 +37,9 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LIBPLENO_INCLUDE_DIRS} ${EIGEN
 
 ##################################################
 ##################################################
-add_executable(evaluate src/evaluate.cpp ${MULTIFOCUS_SRCS})
-target_include_directories(evaluate PRIVATE ${MULTIFOCUS_INCDIRS})
-target_link_libraries(evaluate ${MULTIFOCUS_LIBS})
+add_executable(extrinsics src/extrinsics.cpp ${MULTIFOCUS_SRCS})
+target_include_directories(extrinsics PRIVATE ${MULTIFOCUS_INCDIRS})
+target_link_libraries(extrinsics ${MULTIFOCUS_LIBS})
 
 ##################################################
 ##################################################

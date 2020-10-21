@@ -77,7 +77,7 @@ void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInf
 
 int main(int argc, char* argv[])
 {
-	PRINT_INFO("========= Multifocus plenoptic camera evaluation =========");
+	PRINT_INFO("========= Multifocus plenoptic camera extrinsics evaluation =========");
 	Config_t config = parse_args(argc, argv);
 	
 	Viewer::enable(config.use_gui);

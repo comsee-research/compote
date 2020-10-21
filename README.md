@@ -82,9 +82,9 @@ For instance to run calibration:
 
 **Requirements**: calibrated MIA, computed _internal parameters_, features and scene configuration. If none are given all steps are re-done.
 
-### Calibration Evaluation
+### Extrinsics Estimation & Calibration Evaluation
 
-`evaluate` runs the optimization of extrinsics parameters given a calibrated camera and generates the poses.
+`extrinscs` runs the optimization of extrinsics parameters given a calibrated camera and generates the poses.
 
 **Requirements**: computed _internal parameters_, features, calibrated camera and scene configuration.
 
