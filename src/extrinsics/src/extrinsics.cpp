@@ -11,7 +11,9 @@
 
 #include <pleno/graphic/gui.h>
 #include <pleno/graphic/viewer_2d.h>
+
 #include <pleno/io/printer.h>
+#include <pleno/io/choice.h>
 
 //geometry
 #include <pleno/geometry/camera/plenoptic.h>
@@ -32,31 +34,6 @@
 #include <pleno/io/cfg/poses.h>
 
 #include "utils.h"
-
-void clear() {
-	GUI(
-		PRINT_WARN("Clear viewer ? [y/n]");
-		char c;
-		std::cin >> c;
-		if(c == 'y') {Viewer::clear(); PRINT_DEBUG("Cleared !"); }	
-		std::cin.clear();
-		while (std::cin.get() != '\n');
-	);
-}
-
-bool save() {
-	bool ret = false;
-	if(Printer::level() bitand Printer::Level::WARN)
-	{
-		PRINT_WARN("Save ? [y/n]");
-		char c;
-		std::cin >> c;
-		if(c == 'y') { ret = true; }	
-		std::cin.clear();
-		while (std::cin.get() != '\n');
-	}
-	return ret;
-}
 
 void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInfo>& images)
 {
