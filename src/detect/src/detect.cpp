@@ -130,9 +130,11 @@ int main(int argc, char* argv[])
 	MICObservations center_obs;	
 
 	PRINT_WARN("\t3.1) Computing BAP Features");
-	std::size_t f = 0;
+	std::size_t f_ = 0;
 	for (const auto& [ img, _, frame ] : checkerboards)
 	{		
+		std::size_t f = (frame != -1) ? frame : f_;
+		
 		PRINT_INFO("=== Devignetting image frame f = " << f);
 		Image unvignetted;	devignetting(img, mask, unvignetted);
 			
@@ -159,10 +161,10 @@ int main(int argc, char* argv[])
 		{
 			ObservationsConfig cfg_obs;
 			cfg_obs.features() = bap_obs;
-			v::save("obs/bap-observations-"+std::to_string(getpid())+"-frame-0-to-"+std::to_string(f)+".bin.gz", cfg_obs);
+			v::save("obs/bap-observations-"+std::to_string(getpid())+"-frame-x-to-"+std::to_string(f)+".bin.gz", cfg_obs);
 		}	
 		
-		++f;
+		++f_;
 		PRINT_INFO(std::endl);
 		clear();
 	}	
