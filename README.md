@@ -18,8 +18,8 @@ The COMPOTE applications have a light dependency list:
  * [boost] version 1.54 and up, portable C++ source libraries,
  * [libpleno], an open-souce C++ library for plenoptic camera,
  
-and was compiled on:
- * Ubuntu 18.04.4 LTS.
+and was compiled and tested on:
+ * Ubuntu 18.04.4 LTS, with Eigen 3.3.4, Boost 1.65.1, and OpenCV 3.2.0.
   
 ### Compilation & Test
 
@@ -33,7 +33,7 @@ make -j6
 
 To test the `calibrate` application you can use the example script from the build directory:
 ```
-./../example/calib.sh
+./../example/run_calibration.sh
 ```
 
 Applications
@@ -64,6 +64,8 @@ For instance to run calibration:
 ./calibrate -i images.js -c camera.js -p params.js -f observations.bin.gz -s scene.js -g true -l 7
 ```
 
+Configuration file examples are given for the dataset `R12-A` in the folder `examples/`. 
+
 ### Pre-calibration
 
 `precalibrate` uses whites raw images taken at different aperture to calibrate the Micro-Images Array (MIA) and computes the _internal parameters_ used to initialize the camera and to detect the _Blur Aware Plenoptic (BAP)_ features.
@@ -84,7 +86,7 @@ For instance to run calibration:
 
 ### Extrinsics Estimation & Calibration Evaluation
 
-`extrinscs` runs the optimization of extrinsics parameters given a calibrated camera and generates the poses.
+`extrinsics` runs the optimization of extrinsics parameters given a calibrated camera and generates the poses.
 
 **Requirements**: computed _internal parameters_, features, calibrated camera and scene configuration.
 

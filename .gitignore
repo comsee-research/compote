@@ -43,9 +43,7 @@
 *.tmp
 *.swp
 
-datasets/
-script/
+/datasets
+/script
 
-*.csv
-*.js
-*.sh
+**/old
