@@ -19,7 +19,7 @@
 #include <pleno/geometry/observation.h>
 
 //tools
-#include <pleno/processing/improcess.h> //devignetting
+#include <pleno/processing/imgproc/improcess.h> //devignetting
 
 //config
 #include <pleno/io/cfg/images.h>

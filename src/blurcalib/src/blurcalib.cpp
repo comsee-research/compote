@@ -20,7 +20,7 @@
 #include <pleno/processing/calibration/calibration.h>
 
 //tools
-#include <pleno/processing/improcess.h> //devignetting
+#include <pleno/processing/imgproc/improcess.h> //devignetting
 
 //config
 #include <pleno/io/cfg/images.h>
@@ -29,24 +29,9 @@
 #include <pleno/io/cfg/observations.h>
 #include <pleno/io/cfg/poses.h>
 
-#include "utils.h"
+#include <pleno/io/images.h>
 
-void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInfo>& images)
-{
-	images.reserve(cfgs.size());
-	
-	for(const auto& cfg : cfgs)
-	{
-		PRINT_DEBUG("Load image " << cfg.path());
-		images.emplace_back(
-			ImageWithInfo{ 
-				cv::imread(cfg.path(), cv::IMREAD_UNCHANGED),
-				cfg.fnumber(),
-				cfg.frame()
-			}
-		);	
-	}
-}
+#include "utils.h"
 
 int main(int argc, char* argv[])
 {
@@ -63,15 +48,18 @@ int main(int argc, char* argv[])
 ////////////////////////////////////////////////////////////////////////////////
 	std::vector<ImageWithInfo> checkerboards;
 	Image mask;
+	std::size_t imgformat = 8;
 	{
 		PRINT_WARN("1) Load Images from configuration file");
 		ImagesConfig cfg_images;
 		v::load(config.path.images, cfg_images);
+		DEBUG_ASSERT((cfg_images.meta().rgb()), "Images must be in rgb format.");
+		DEBUG_ASSERT((cfg_images.meta().format() < 16), "Floating-point images not supported.");
 	
+		imgformat = cfg_images.meta().format();
 		//1.2) Load checkerboard images
 		PRINT_WARN("\t1.1) Load checkerboard images");	
-		//std::vector<ImageWithInfo> checkerboards;	
-		load(cfg_images.checkerboards(), checkerboards);
+		load(cfg_images.checkerboards(), checkerboards, cfg_images.meta().debayer());
 		
 		DEBUG_ASSERT((checkerboards.size() != 0u),	"You need to provide checkerboard images!");
 		
@@ -83,11 +71,9 @@ int main(int argc, char* argv[])
 		
 		//1.3) Load white image corresponding to the aperture (mask)
 		PRINT_WARN("\t1.2) Load white image corresponding to the aperture (mask)");
-		const auto [mask_, mfnbr, __] = ImageWithInfo{ 
-					cv::imread(cfg_images.mask().path(), cv::IMREAD_UNCHANGED),
-					cfg_images.mask().fnumber()
-				};
-		mask = mask_;
+		ImageWithInfo mask_; load(cfg_images.mask(), mask_, cfg_images.meta().debayer());
+		
+		const auto [mimg, mfnbr, __] = mask_; mask = mimg;
 		DEBUG_ASSERT((mfnbr == cbfnbr), "No corresponding f-number between mask and images");
 	}
     
@@ -129,9 +115,12 @@ int main(int argc, char* argv[])
 	std::transform(
 		checkerboards.begin(), checkerboards.end(),
 		std::back_inserter(pictures),
-		[&mask](const auto& iwi) -> Image { 
+		[&mask, &imgformat](const auto& iwi) -> Image { 
 			Image unvignetted;
-			devignetting(iwi.img, mask, unvignetted);
+			
+			if (imgformat == 8) devignetting(iwi.img, mask, unvignetted);
+			else /* if (imgformat == 16) */ devignetting_u16(iwi.img, mask, unvignetted);
+			
     		Image img = Image::zeros(unvignetted.rows, unvignetted.cols, CV_8UC1);
 			cv::cvtColor(unvignetted, img, cv::COLOR_BGR2GRAY);
 			return img; 

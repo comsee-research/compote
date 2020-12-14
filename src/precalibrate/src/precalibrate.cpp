@@ -25,31 +25,16 @@
 #include <pleno/processing/calibration/calibration.h>
 
 //tools
-#include <pleno/processing/improcess.h> //devignetting
+#include <pleno/processing/imgproc/improcess.h> //devignetting
 
 //config
 #include <pleno/io/cfg/images.h>
 #include <pleno/io/cfg/camera.h>
 
+#include <pleno/io/images.h>
+
 #include "utils.h"
 
-
-void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInfo>& images)
-{
-	images.reserve(cfgs.size());
-	
-	for(const auto& cfg : cfgs)
-	{	
-		PRINT_DEBUG("Load image " << cfg.path());
-		images.emplace_back(
-			ImageWithInfo{ 
-				cv::imread(cfg.path(), cv::IMREAD_UNCHANGED),
-				cfg.fnumber(),
-				cfg.frame()
-			}
-		);	
-	}
-}
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char* argv[])
@@ -68,9 +53,11 @@ int main(int argc, char* argv[])
 	PRINT_WARN("1) Load white images from configuration file");
 	ImagesConfig cfg_images;
 	v::load(config.path.images, cfg_images);
+	DEBUG_ASSERT((cfg_images.meta().rgb()), "Images must be in rgb format.");
+	DEBUG_ASSERT((cfg_images.meta().format() <= 16), "Floating-point images not supported.");
 
 	std::vector<ImageWithInfo> whites;	
-	load(cfg_images.whites(), whites);
+	load(cfg_images.whites(), whites, cfg_images.meta().debayer());
 	
 	DEBUG_ASSERT((whites.size() != 0u), "You need to provide white images if no features are given !");
 	

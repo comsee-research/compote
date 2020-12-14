@@ -24,7 +24,7 @@
 #include <pleno/processing/calibration/calibration.h>
 
 //tools
-#include <pleno/processing/improcess.h> //devignetting
+#include <pleno/processing/imgproc/improcess.h> //devignetting
 
 //config
 #include <pleno/io/cfg/images.h>
@@ -33,24 +33,9 @@
 #include <pleno/io/cfg/observations.h>
 #include <pleno/io/cfg/poses.h>
 
-#include "utils.h"
+#include <pleno/io/images.h>
 
-void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInfo>& images)
-{
-	images.reserve(cfgs.size());
-	
-	for(const auto& cfg : cfgs)
-	{
-		PRINT_DEBUG("Load image " << cfg.path());
-		images.emplace_back(
-			ImageWithInfo{ 
-				cv::imread(cfg.path(), cv::IMREAD_UNCHANGED),
-				cfg.fnumber(),
-				cfg.frame()
-			}
-		);	
-	}
-}
+#include "utils.h"
 
 int main(int argc, char* argv[])
 {
@@ -76,18 +61,20 @@ int main(int argc, char* argv[])
 // 2) Load images from configuration file
 ////////////////////////////////////////////////////////////////////////////////	
 	PRINT_WARN("2) Load images from configuration file");
-	PRINT_WARN("\t2.1) Load white image corresponding to the aperture mask");
 	ImagesConfig cfg_images;
 	v::load(config.path.images, cfg_images);
+	DEBUG_ASSERT((cfg_images.meta().rgb()), "Images must be in rgb format.");
+	DEBUG_ASSERT((cfg_images.meta().format() < 16), "Floating-point images not supported.");
 	
-	const auto [mask, mfnbr, __] = ImageWithInfo{ 
-				cv::imread(cfg_images.mask().path(), cv::IMREAD_UNCHANGED),
-				cfg_images.mask().fnumber()
-			};
+	PRINT_WARN("\t2.1) Load white image corresponding to the aperture mask");
+	ImageWithInfo mask_;
+	load(cfg_images.mask(), mask_, cfg_images.meta().debayer());
+	
+	const auto [mask, mfnbr, __] = mask_;
 	
 	PRINT_WARN("\t2.2) Load checkerboard images");
 	std::vector<ImageWithInfo> checkerboards;	
-	load(cfg_images.checkerboards(), checkerboards);
+	load(cfg_images.checkerboards(), checkerboards, cfg_images.meta().debayer());
 
 ////////////////////////////////////////////////////////////////////////////////	
 // 3) Loading Features
@@ -116,9 +103,12 @@ int main(int argc, char* argv[])
 	std::transform(
 		checkerboards.begin(), checkerboards.end(),
 		std::back_inserter(pictures),
-		[&mask](const auto& iwi) -> Image { 
+		[&mask, format = cfg_images.meta().format()](const auto& iwi) -> Image { 
 			Image unvignetted;
-			devignetting(iwi.img, mask, unvignetted);
+			
+			if (format == 8u) devignetting(iwi.img, mask, unvignetted);
+			else /* if (format == 16u) */ devignetting_u16(iwi.img, mask, unvignetted);
+			
     		Image img = Image::zeros(unvignetted.rows, unvignetted.cols, CV_8UC1);
 			cv::cvtColor(unvignetted, img, cv::COLOR_BGR2GRAY);
 			return img; 
