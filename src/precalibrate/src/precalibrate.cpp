@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
 	InternalParameters params;
 
 FORCE_GUI(true);
-	params = preprocess(whites, mia, sensor.scale(), cfg_camera.I(), cfg_camera.mode());
+	params = preprocess(whites, mia, sensor.scale(), cfg_camera.I(), cfg_camera.mode(), cfg_camera.main_lens().aperture());
 FORCE_GUI(false);
 	v::save(config.path.params, v::make_serializable(&params));
 
