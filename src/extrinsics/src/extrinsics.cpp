@@ -59,23 +59,47 @@ int main(int argc, char* argv[])
 	
 ////////////////////////////////////////////////////////////////////////////////		
 // 2) Load images from configuration file
-////////////////////////////////////////////////////////////////////////////////	
-	PRINT_WARN("2) Load images from configuration file");
-	ImagesConfig cfg_images;
-	v::load(config.path.images, cfg_images);
-	DEBUG_ASSERT((cfg_images.meta().rgb()), "Images must be in rgb format.");
-	DEBUG_ASSERT((cfg_images.meta().format() < 16), "Floating-point images not supported.");
-	
-	PRINT_WARN("\t2.1) Load white image corresponding to the aperture mask");
-	ImageWithInfo mask_;
-	load(cfg_images.mask(), mask_, cfg_images.meta().debayer());
-	
-	const auto [mask, mfnbr, __] = mask_;
-	
-	PRINT_WARN("\t2.2) Load checkerboard images");
-	std::vector<ImageWithInfo> checkerboards;	
-	load(cfg_images.checkerboards(), checkerboards, cfg_images.meta().debayer());
-
+////////////////////////////////////////////////////////////////////////////////
+	std::vector<Image> pictures;
+	if (config.path.images == "")
+	{
+		PRINT_WARN("2) No images to load from configuration file");
+	}
+	else
+	{
+		PRINT_WARN("2) Load images from configuration file");
+		ImagesConfig cfg_images;
+		v::load(config.path.images, cfg_images);
+		DEBUG_ASSERT((cfg_images.meta().rgb()), "Images must be in rgb format.");
+		DEBUG_ASSERT((cfg_images.meta().format() < 16), "Floating-point images not supported.");
+		
+		PRINT_WARN("\t2.1) Load white image corresponding to the aperture mask");
+		ImageWithInfo mask_;
+		load(cfg_images.mask(), mask_, cfg_images.meta().debayer());
+		
+		const auto [mask, mfnbr, __] = mask_;
+		
+		PRINT_WARN("\t2.2) Load checkerboard images");
+		std::vector<ImageWithInfo> checkerboards;	
+		load(cfg_images.checkerboards(), checkerboards, cfg_images.meta().debayer());
+		
+		pictures.reserve(checkerboards.size());
+		
+		std::transform(
+			checkerboards.begin(), checkerboards.end(),
+			std::back_inserter(pictures),
+			[&mask, format = cfg_images.meta().format()](const auto& iwi) -> Image { 
+				Image unvignetted;
+				
+				if (format == 8u) devignetting(iwi.img, mask, unvignetted);
+				else /* if (format == 16u) */ devignetting_u16(iwi.img, mask, unvignetted);
+				
+				Image img = Image::zeros(unvignetted.rows, unvignetted.cols, CV_8UC1);
+				cv::cvtColor(unvignetted, img, cv::COLOR_BGR2GRAY);
+				return img; 
+			}	
+		);	
+	}
 ////////////////////////////////////////////////////////////////////////////////	
 // 3) Loading Features
 ////////////////////////////////////////////////////////////////////////////////	
@@ -96,24 +120,6 @@ int main(int argc, char* argv[])
 	DEBUG_ASSERT((cfg_scene.checkerboards().size() > 0u), "No checkerboard model provided.");
 	
 	CheckerBoard scene{cfg_scene.checkerboards()[0]};
-			
-	std::vector<Image> pictures;
-	pictures.reserve(checkerboards.size());
-	
-	std::transform(
-		checkerboards.begin(), checkerboards.end(),
-		std::back_inserter(pictures),
-		[&mask, format = cfg_images.meta().format()](const auto& iwi) -> Image { 
-			Image unvignetted;
-			
-			if (format == 8u) devignetting(iwi.img, mask, unvignetted);
-			else /* if (format == 16u) */ devignetting_u16(iwi.img, mask, unvignetted);
-			
-    		Image img = Image::zeros(unvignetted.rows, unvignetted.cols, CV_8UC1);
-			cv::cvtColor(unvignetted, img, cv::COLOR_BGR2GRAY);
-			return img; 
-		}	
-	);	
 	
 	PRINT_WARN("\t4.2) Calibrate Extrinsics");
 	CalibrationPoses poses;
@@ -133,7 +139,7 @@ int main(int argc, char* argv[])
 			++i;
 		}
 		
-		v::save(config.path.extrinsics, cfg_poses );
+		v::save(config.path.extrinsics, cfg_poses);
 	}
 	
 	PRINT_INFO("========= EOF =========");
