@@ -62,14 +62,14 @@ int main(int argc, char* argv[])
 	//1.1) Load whites images
     PRINT_WARN("\t1.1) Load whites images");
 	std::vector<ImageWithInfo> whites;	
-	load(cfg_images.whites(), whites, cfg_images.meta().debayer());
+	load(cfg_images.whites(), whites, cfg_images.meta().debayered());
 	
 	DEBUG_ASSERT((whites.size() != 0u),	"You need to provide white images!");
 	
 	//1.2) Load checkerboard images
 	PRINT_WARN("\t1.2) Load checkerboard images");	
 	std::vector<ImageWithInfo> checkerboards;	
-	load(cfg_images.checkerboards(), checkerboards, cfg_images.meta().debayer());
+	load(cfg_images.checkerboards(), checkerboards, cfg_images.meta().debayered());
 	
 	DEBUG_ASSERT((checkerboards.size() != 0u),	"You need to provide checkerboard images!");
 	
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	//1.3) Load white image corresponding to the aperture (mask)
 	PRINT_WARN("\t1.3) Load white image corresponding to the aperture (mask)");
 	ImageWithInfo mask_;
-	load(cfg_images.mask(), mask_, cfg_images.meta().debayer());
+	load(cfg_images.mask(), mask_, cfg_images.meta().debayered());
 	
 	const auto [mask, mfnbr, __] = mask_;
 	DEBUG_ASSERT((mfnbr == cbfnbr), "No corresponding f-number between mask and images");

@@ -75,13 +75,13 @@ int main(int argc, char* argv[])
 		
 		PRINT_WARN("\t2.1) Load white image corresponding to the aperture mask");
 		ImageWithInfo mask_;
-		load(cfg_images.mask(), mask_, cfg_images.meta().debayer());
+		load(cfg_images.mask(), mask_, cfg_images.meta().debayered());
 		
 		const auto [mask, mfnbr, __] = mask_;
 		
 		PRINT_WARN("\t2.2) Load checkerboard images");
 		std::vector<ImageWithInfo> checkerboards;	
-		load(cfg_images.checkerboards(), checkerboards, cfg_images.meta().debayer());
+		load(cfg_images.checkerboards(), checkerboards, cfg_images.meta().debayered());
 		
 		pictures.reserve(checkerboards.size());
 		

@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
 	DEBUG_ASSERT((cfg_images.meta().format() <= 16), "Floating-point images not supported.");
 
 	std::vector<ImageWithInfo> whites;	
-	load(cfg_images.whites(), whites, cfg_images.meta().debayer());
+	load(cfg_images.whites(), whites, cfg_images.meta().debayered());
 	
 	DEBUG_ASSERT((whites.size() != 0u), "You need to provide white images if no features are given !");
 	

@@ -13,5 +13,6 @@ add_subdirectory(src/detect)
 add_subdirectory(src/extrinsics)
 
 add_subdirectory(src/blurcalib)
+add_subdirectory(src/invdistortioncalib)
 
 
