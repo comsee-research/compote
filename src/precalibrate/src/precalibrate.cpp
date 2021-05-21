@@ -115,7 +115,6 @@ int main(int argc, char* argv[])
 FORCE_GUI(true);
 	params = preprocess(whites, mia, sensor.scale(), cfg_camera.I(), cfg_camera.mode(), cfg_camera.main_lens().aperture());
 FORCE_GUI(false);
-	v::save(config.path.params, v::make_serializable(&params));
 
 	PRINT_INFO("Internal Parameters = " << params << std::endl);
 	clear();
@@ -133,6 +132,7 @@ FORCE_GUI(false);
 			mfpc.init(sensor, mia, params, F, N, h, mode);
 		}
 		save("camera-"+std::to_string(getpid())+".js", mfpc);
+		v::save(config.path.params, v::make_serializable(&(mfpc.params())));
 	}
 	
 	PRINT_INFO("========= EOF =========");

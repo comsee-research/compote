@@ -265,7 +265,7 @@ int main(int argc, char* argv[])
 	);	
 	
 	PRINT_WARN("\t5.2) Computing Initial Model");
-	PlenopticCamera mfpc;
+	PlenopticCamera mfpc; load(config.path.camera, mfpc);
 	{
 		const double F = cfg_camera.main_lens().f();
 		const double N = cfg_camera.main_lens().aperture();
@@ -280,11 +280,44 @@ int main(int argc, char* argv[])
 	CalibrationPoses poses;
 	calibration_PlenopticCamera(poses, mfpc, scene, bap_obs, center_obs, pictures);
 
-	PRINT_WARN("\t5.4) Save Calibration Parameters");
+	if (yes_no_question("Calibrate inverse distortion"))
+	{
+		PRINT_WARN("\t5.4) Starting Calibration of the inverse distortions");
+		
+		CheckerBoards boards; boards.reserve(poses.size());
+		for (const auto& [p, f] : poses)
+		{
+			scene.pose() = p;
+			boards.emplace_back(scene);		
+		}
+		
+		Distortions invdistortions;
+		calibration_inverseDistortions(invdistortions, mfpc, boards);
+		
+		mfpc.main_lens_invdistortions() = invdistortions;
+	}
+	
+	if (yes_no_question("Calibrate blur coefficient"))
+	{
+		PRINT_WARN("\t5.5) Starting Calibration of blur proportionnality coefficient");
+		
+		calibration_relativeBlur(mfpc.params(), bap_obs, pictures);
+	}
+
+////////////////////////////////////////////////////////////////////////////////
+// 6) Save Calibration Parameters
+////////////////////////////////////////////////////////////////////////////////
+	PRINT_WARN("6) Save Calibration Parameters");
 	if(save()) 
 	{
 		PRINT_WARN("\t... Saving Intrinsic Parameters");
 		save(config.path.output, mfpc);
+		
+		PRINT_WARN("\t... Saving Internal Parameters");
+		v::save(
+			"params.js", 
+			v::make_serializable(&(mfpc.params()))
+		);
 		
 		PRINT_WARN("\t... Saving Extrinsics Parameters");
 		CalibrationPosesConfig cfg_poses;
@@ -292,7 +325,8 @@ int main(int argc, char* argv[])
 		
 		int i=0;
 		for(const auto& [p, f] : poses) {
-			DEBUG_VAR(f); DEBUG_VAR(p); 
+			Pose pc = to_coordinate_system_of(p, Pose{});
+			DEBUG_VAR(f); DEBUG_VAR(p); DEBUG_VAR(pc);
 			cfg_poses.poses()[i].pose() = p;
 			cfg_poses.poses()[i].frame() = f;
 			++i;

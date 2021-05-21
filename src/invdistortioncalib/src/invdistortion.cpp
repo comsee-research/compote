@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 	{
 		mfpc.main_lens_invdistortions() = invdistortions;
 		
-		PRINT_WARN("\t... Saving Intrinsic Parameters");
+		PRINT_WARN("... Saving Intrinsic Parameters");
 		save(config.path.output, mfpc);
 	}
 	
