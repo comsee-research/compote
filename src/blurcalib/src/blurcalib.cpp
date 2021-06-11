@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 	{
 		PRINT_WARN("1) Load Images from configuration file");
 		ImagesConfig cfg_images;
-		v::load(config.path.images, cfg_images);
+		v::load(config.path.images, cfg_images);		
 		DEBUG_ASSERT((cfg_images.meta().rgb()), "Images must be in rgb format.");
 		DEBUG_ASSERT((cfg_images.meta().format() < 16), "Floating-point images not supported.");
 	
@@ -109,13 +109,12 @@ int main(int argc, char* argv[])
 	PRINT_WARN("4) Starting Calibration of the Relative blur Radius");
 	PRINT_WARN("\t4.1) Devignetting images");
 			
-	std::vector<Image> pictures;
-	pictures.reserve(checkerboards.size());
+	IndexedImages pictures;
 	
 	std::transform(
 		checkerboards.begin(), checkerboards.end(),
-		std::back_inserter(pictures),
-		[&mask, &imgformat](const auto& iwi) -> Image { 
+		std::inserter(pictures, pictures.end()),
+		[&mask, &imgformat](const auto& iwi) -> auto { 
 			Image unvignetted;
 			
 			if (imgformat == 8) devignetting(iwi.img, mask, unvignetted);
@@ -123,7 +122,7 @@ int main(int argc, char* argv[])
 			
     		Image img = Image::zeros(unvignetted.rows, unvignetted.cols, CV_8UC1);
 			cv::cvtColor(unvignetted, img, cv::COLOR_BGR2GRAY);
-			return img; 
+			return std::make_pair(iwi.frame, img); 
 		}	
 	);	
 

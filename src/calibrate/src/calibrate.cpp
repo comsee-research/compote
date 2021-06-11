@@ -246,23 +246,23 @@ int main(int argc, char* argv[])
 	
 	CheckerBoard scene{cfg_scene.checkerboards()[0]};
 			
-	std::vector<Image> pictures;
-	pictures.reserve(checkerboards.size());
+	IndexedImages pictures;
 	
 	std::transform(
 		checkerboards.begin(), checkerboards.end(),
-		std::back_inserter(pictures),
-		[&mask, &imgformat](const auto& iwi) -> Image { 
+		std::inserter(pictures, pictures.end()),
+		[&mask, &imgformat](const auto& iwi) -> auto { 
 			Image unvignetted;
 			
-			if (imgformat == 8u) devignetting(iwi.img, mask, unvignetted);
-			else /* if (imgformat == 16u) */ devignetting_u16(iwi.img, mask, unvignetted);
+			if (imgformat == 8) devignetting(iwi.img, mask, unvignetted);
+			else /* if (imgformat == 16) */ devignetting_u16(iwi.img, mask, unvignetted);
 			
     		Image img = Image::zeros(unvignetted.rows, unvignetted.cols, CV_8UC1);
 			cv::cvtColor(unvignetted, img, cv::COLOR_BGR2GRAY);
-			return img; 
+			return std::make_pair(iwi.frame, img); 
 		}	
 	);	
+
 	
 	PRINT_WARN("\t5.2) Computing Initial Model");
 	PlenopticCamera mfpc; load(config.path.camera, mfpc);
@@ -297,7 +297,7 @@ int main(int argc, char* argv[])
 		mfpc.main_lens_invdistortions() = invdistortions;
 	}
 	
-	if (yes_no_question("Calibrate blur coefficient"))
+	if (mfpc.multifocus() and yes_no_question("Calibrate blur coefficient"))
 	{
 		PRINT_WARN("\t5.5) Starting Calibration of blur proportionnality coefficient");
 		

@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 ////////////////////////////////////////////////////////////////////////////////		
 // 2) Load images from configuration file
 ////////////////////////////////////////////////////////////////////////////////
-	std::vector<Image> pictures;
+	IndexedImages pictures;
 	if (config.path.images == "")
 	{
 		PRINT_WARN("2) No images to load from configuration file");
@@ -82,13 +82,11 @@ int main(int argc, char* argv[])
 		PRINT_WARN("\t2.2) Load checkerboard images");
 		std::vector<ImageWithInfo> checkerboards;	
 		load(cfg_images.checkerboards(), checkerboards, cfg_images.meta().debayered());
-		
-		pictures.reserve(checkerboards.size());
-		
+				
 		std::transform(
 			checkerboards.begin(), checkerboards.end(),
-			std::back_inserter(pictures),
-			[&mask, format = cfg_images.meta().format()](const auto& iwi) -> Image { 
+			std::inserter(pictures, pictures.end()),
+			[&mask, format = cfg_images.meta().format()](const auto& iwi) -> auto { 
 				Image unvignetted;
 				
 				if (format == 8u) devignetting(iwi.img, mask, unvignetted);
@@ -96,7 +94,7 @@ int main(int argc, char* argv[])
 				
 				Image img = Image::zeros(unvignetted.rows, unvignetted.cols, CV_8UC1);
 				cv::cvtColor(unvignetted, img, cv::COLOR_BGR2GRAY);
-				return img; 
+				return std::make_pair(iwi.frame, img); ; 
 			}	
 		);	
 	}

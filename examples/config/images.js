@@ -1,4 +1,9 @@
 {
+    "meta": {
+        "debayered": "true",
+        "format": "8",
+        "rgb": "true"
+    },
 	"whites": [
 		{
 			"path": "/home/libpleno/datasets/R12-A/whites/white-n-4.png",
