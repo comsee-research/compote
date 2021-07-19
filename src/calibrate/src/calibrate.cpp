@@ -203,7 +203,7 @@ int main(int argc, char* argv[])
 		}	
 		//4.2) Computing MIC Features
 		PRINT_WARN("\t4.2) Computing MIC Features");
-		center_obs = detection_mic(whites[1].img);
+		center_obs = detection_mic(whites[1].img, cfg_camera.I());
 		
 		//4.3) Saving Features
 		PRINT_WARN("\t4.3) Saving Features");
@@ -224,6 +224,14 @@ int main(int argc, char* argv[])
 
 		bap_obs = cfg_obs.features(); DEBUG_VAR(bap_obs.size());
 		center_obs = cfg_obs.centers(); DEBUG_VAR(center_obs.size());
+
+		if (center_obs.size() == 0u) 
+		{
+			//recompute centers
+			center_obs = detection_mic(whites[1].img, cfg_camera.I());
+			cfg_obs.centers() = center_obs;	
+			v::save("updated-observations-"+std::to_string(getpid())+".bin.gz", cfg_obs);
+		}
 		
 		DEBUG_ASSERT(
 			((bap_obs.size() > 0u) and (center_obs.size() > 0u)), 
@@ -275,6 +283,7 @@ int main(int argc, char* argv[])
 		mfpc.init(sensor, mia, params, F, N, h, mode);
 	}
 	PRINT_INFO("=== Initial Camera Parameters " << std::endl << "MFPC = " << mfpc);
+	save("initial-intrinsics-"+std::to_string(getpid())+".js", mfpc);
 
 	PRINT_WARN("\t5.3) Calibrate");	
 	CalibrationPoses poses;

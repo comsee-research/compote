@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 	}	
 	//5.4) Computing MIC Features
 	PRINT_WARN("\t3.2) Computing MIC Features");
-	center_obs = detection_mic(whites[1].img);
+	center_obs = detection_mic(whites[1].img, cfg_camera.I());
 		
 	//save centers observations
 	{

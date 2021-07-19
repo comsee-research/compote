@@ -71,10 +71,12 @@ int main(int argc, char* argv[])
 	//2.1) Sensor parameters intialization
     PRINT_WARN("\t2.1) Sensor parameters intialization");
 	Sensor sensor{cfg_camera.sensor()};
+	DEBUG_VAR(sensor);
 	
 	//2.2) Grid parameters initialization
 	PRINT_WARN("\t2.2) MIA geometry parameters initialization");
     MIA mia{cfg_camera.mia()};
+    DEBUG_VAR(mia);
         
 ////////////////////////////////////////////////////////////////////////////////
 // 3) Grid Parameters calibration
@@ -86,9 +88,10 @@ int main(int argc, char* argv[])
 	
 	for(const auto& [img, fnumber, __] : whites)
 	{
-		if(fnumber <= 4.) continue; //micro-images are overlapping
+		if(fnumber <= cfg_camera.main_lens().aperture() and cfg_camera.mode() != PlenopticCamera::Mode::Unfocused) continue; //micro-images are overlapping
+		
 		PRINT_INFO("=== Computing MIC in image f/" << fnumber);
-		MICObservations obs = detection_mic(img);
+		MICObservations obs = detection_mic(img, cfg_camera.I());
 		mic_obs.insert(std::end(mic_obs), std::begin(obs), std::end(obs));
 	
 		GUI(
@@ -100,12 +103,13 @@ int main(int argc, char* argv[])
     }	
 	//3.2) Optimization
 	PRINT_WARN("\t3.2) MIA geometry parameters calibration");
-    calibration_MIA(mia, mic_obs);
+	calibration_MIA(mia, mic_obs);
    
-    PRINT_INFO("Optimized MIA geometry parameters = \n" << mia);
+    PRINT_INFO("Optimized MIA geometry parameters = \n" << mia);  
     RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()++).pen_color(v::green).pen_width(5).name("main:optimizedgrid(green)"), mia);
-	clear();	
-
+	clear();
+	
+	wait();
 ////////////////////////////////////////////////////////////////////////////////
 // 4) Preprocess white images and Set internal parameters
 ////////////////////////////////////////////////////////////////////////////////
