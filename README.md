@@ -5,7 +5,7 @@
 COMPOTE: Calibration Of Multi-focus PlenOpTic camEra.
 =====================================================
 
-COMPOTE is a set of tools to pre-calibrate and calibrate a multifocus plenoptic camera (e.g., a Raytrix R12) based on the [libpleno].
+COMPOTE is a set of tools to pre-calibrate and calibrate (multifocus) plenoptic cameras (e.g., a Raytrix R12) based on the [libpleno].
 
 
 Quick Start
@@ -19,7 +19,7 @@ The COMPOTE applications have a light dependency list:
  * [libpleno], an open-souce C++ library for plenoptic camera,
  
 and was compiled and tested on:
- * Ubuntu 18.04.4 LTS, with Eigen 3.3.4, Boost 1.65.1, and OpenCV 3.2.0.
+ * Ubuntu 18.04.4 LTS, GCC 7.5.0, with Eigen 3.3.4, Boost 1.65.1, and OpenCV 3.2.0.
   
 ### Compilation & Test
 
@@ -70,40 +70,49 @@ Configuration file examples are given for the dataset `R12-A` in the folder `exa
 
 `precalibrate` uses whites raw images taken at different aperture to calibrate the Micro-Images Array (MIA) and computes the _internal parameters_ used to initialize the camera and to detect the _Blur Aware Plenoptic (BAP)_ features.
 
-**Requirements**: None.
+**Requirements:** minimal camera configuration, white images.
+**Output:** radii statistics (.csv), internal parameters, initial camera parameters.
+
 
 ### Features Detection
 
 `detect` extracts the newly introduced _Blur Aware Plenoptic (BAP)_ features in checkerboard images.
 
-**Requirements**: calibrated MIA, computed _internal parameters_ and scene configuration.
+**Requirements:** calibrated MIA, internal parameters, checkerboard images, and scene configuration.
+**Output:** micro-image centers and _BAP_ features.
 
 ### Camera Calibration
 
 `calibrate` runs the calibration of the plenoptic camera (set `I=0` to act as pinholes array, or `I>0` for multifocus case). It generates the intrinsics and extrinsics parameters.
 
-**Requirements**: calibrated MIA, computed _internal parameters_, features and scene configuration. If none are given all steps are re-done.
+**Requirements**: calibrated MIA, internal parameters, features and scene configuration. If none are given all steps are re-done.
+**Output:** error statistics, calibrated camera parameters, camera poses.
 
 ### Extrinsics Estimation & Calibration Evaluation
 
 `extrinsics` runs the optimization of extrinsics parameters given a calibrated camera and generates the poses.
 
-**Requirements**: computed _internal parameters_, features, calibrated camera and scene configuration.
+**Requirements**: _internal parameters_, features, calibrated camera and scene configuration.
+**Output:** error statistics, estimated poses.
 
 COMPOTE also provides two applications to run stats evaluation on the optimized poses optained with a constant step linear translation along the _z_-axis:
  * `linear_evaluation` gives the absolute errors (mean + std) and the relative errors (mean + std) of translation of the optimized poses,
  * `linear_raytrix_evaluation` takes `.xyz` pointcloud obtained by _Raytrix_ calibration software and gives the absolute errors (mean + std) and the relative errors (mean + std) of translation.
 
+**Note:** those apps are legacy and have been moved and generalized in the [BLADE] app's `evaluate`.
+
 ### Blur Proportionality Coefficient Calibration
 
 `blurcalib` runs the calibration of the blur proportionality coefficient `kappa` linking the spread parameter of the PSF with the blur radius. It updates the internal parameters with the optimized value of `kappa`.
 
-**Requirements**: computed _internal parameters_, features and images.
+**Requirements**: internal parameters, features and images.
+**Output:** internal parameters.
   
 Datasets
 ========
 
 Datasets R12-A, R12-B and R12-C can be downloaded [from here](https://github.com/comsee-research/plenoptic-datasets).
+The dataset R12-D, and the simulated _unfocused plenoptic camera_ dataset UPC-S are also available [from here](https://github.com/comsee-research/plenoptic-datasets).
 
 Citing
 ======

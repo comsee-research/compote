@@ -111,6 +111,7 @@ int main(int argc, char* argv[])
 	PRINT_WARN("\t2.2) MIA geometry parameters initialization");
     MIA mia{cfg_camera.mia()};
     
+    RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()++).name("mask"), mask);
     RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()++).pen_color(v::purple).pen_width(5).name("main:initialgrid(purple)"), mia);
     
 ////////////////////////////////////////////////////////////////////////////////
