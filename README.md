@@ -61,7 +61,7 @@ All applications use _.js (json)_ configuration file. The path to this configura
 
 For instance to run calibration:
 ```
-./calibrate -i images.js -c camera.js -p params.js -f observations.bin.gz -s scene.js -g true -l 7
+./src/calibrate/calibrate -i images.js -c camera.js -p params.js -f observations.bin.gz -s scene.js -g true -l 7
 ```
 
 Configuration file examples are given for the dataset `R12-A` in the folder `examples/`. 
@@ -71,6 +71,7 @@ Configuration file examples are given for the dataset `R12-A` in the folder `exa
 `precalibrate` uses whites raw images taken at different aperture to calibrate the Micro-Images Array (MIA) and computes the _internal parameters_ used to initialize the camera and to detect the _Blur Aware Plenoptic (BAP)_ features.
 
 **Requirements:** minimal camera configuration, white images.
+
 **Output:** radii statistics (.csv), internal parameters, initial camera parameters.
 
 
@@ -79,6 +80,7 @@ Configuration file examples are given for the dataset `R12-A` in the folder `exa
 `detect` extracts the newly introduced _Blur Aware Plenoptic (BAP)_ features in checkerboard images.
 
 **Requirements:** calibrated MIA, internal parameters, checkerboard images, and scene configuration.
+
 **Output:** micro-image centers and _BAP_ features.
 
 ### Camera Calibration
@@ -86,33 +88,47 @@ Configuration file examples are given for the dataset `R12-A` in the folder `exa
 `calibrate` runs the calibration of the plenoptic camera (set `I=0` to act as pinholes array, or `I>0` for multifocus case). It generates the intrinsics and extrinsics parameters.
 
 **Requirements**: calibrated MIA, internal parameters, features and scene configuration. If none are given all steps are re-done.
+
 **Output:** error statistics, calibrated camera parameters, camera poses.
 
-### Extrinsics Estimation & Calibration Evaluation
+### Extrinsics Estimation (+ Calibration Evaluation)
 
 `extrinsics` runs the optimization of extrinsics parameters given a calibrated camera and generates the poses.
 
 **Requirements**: _internal parameters_, features, calibrated camera and scene configuration.
+
 **Output:** error statistics, estimated poses.
 
 COMPOTE also provides two applications to run stats evaluation on the optimized poses optained with a constant step linear translation along the _z_-axis:
  * `linear_evaluation` gives the absolute errors (mean + std) and the relative errors (mean + std) of translation of the optimized poses,
  * `linear_raytrix_evaluation` takes `.xyz` pointcloud obtained by _Raytrix_ calibration software and gives the absolute errors (mean + std) and the relative errors (mean + std) of translation.
 
-**Note:** those apps are legacy and have been moved and generalized in the [BLADE] app's `evaluate`.
+**Note:** those apps are legacy and have been moved and generalized in the [BLADE] app's `evaluate`. 
+If you want to enable the compilation of legacy applications for evaluations, add the option `-DCOMPILE_LEGACY_EVAL` to cmake.
 
 ### Blur Proportionality Coefficient Calibration
 
-`blurcalib` runs the calibration of the blur proportionality coefficient `kappa` linking the spread parameter of the PSF with the blur radius. It updates the internal parameters with the optimized value of `kappa`.
+`blur` runs the calibration of the blur proportionality coefficient `kappa` linking the spread parameter of the PSF with the blur radius. It updates the internal parameters with the optimized value of `kappa`.
 
 **Requirements**: internal parameters, features and images.
+
 **Output:** internal parameters.
+
+### Inverse Distortion Coefficients Calibration
+
+`invdistortion` runs the calibration of the inverse distortion coefficients `\phi^{-1}` used in the inverse projection model.
+
+**Requirements**: camera parameters, internal parameters and scene configuration.
+
+**Output:** calibrated camera parameters.
+
   
 Datasets
 ========
 
-Datasets R12-A, R12-B and R12-C can be downloaded [from here](https://github.com/comsee-research/plenoptic-datasets).
-The dataset R12-D, and the simulated _unfocused plenoptic camera_ dataset UPC-S are also available [from here](https://github.com/comsee-research/plenoptic-datasets).
+* Datasets R12-A, R12-B and R12-C can be downloaded [from here](https://github.com/comsee-research/plenoptic-datasets).
+* The dataset R12-D, and the simulated _unfocused plenoptic camera_ dataset UPC-S are also available [from here](https://github.com/comsee-research/plenoptic-datasets).
+* Datasets R12-E, ES and ELP20 are available [here](https://github.com/comsee-research/plenoptic-datasets).
 
 Citing
 ======
@@ -125,6 +141,15 @@ If you use COMPOTE or [libpleno] in an academic context, please cite the followi
 	  booktitle	=	{Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
 	  pages		=	{2545--2554},
 	  year		=	{2020}
+	}
+	
+or 
+
+	@article{labussiere2021calibration
+	  title	    =	{Leveraging blur information for plenoptic camera calibration},
+	  author	=	{Labussi{\`e}re, Mathieu and Teuli{\`e}re, C{\'e}line and Bernardin, Fr{\'e}d{\'e}ric and Ait-Aider, Omar},
+	  journal	=	{arXiv preprint arXiv:2111.05226},
+	  year		=	{2021}
 	}
 
 
