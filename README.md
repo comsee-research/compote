@@ -145,13 +145,16 @@ If you use COMPOTE or [libpleno] in an academic context, please cite the followi
 	
 or 
 
-	@article{labussiere2021calibration
-	  title	    =	{Leveraging blur information for plenoptic camera calibration},
-	  author	=	{Labussi{\`e}re, Mathieu and Teuli{\`e}re, C{\'e}line and Bernardin, Fr{\'e}d{\'e}ric and Ait-Aider, Omar},
-	  journal	=	{arXiv preprint arXiv:2111.05226},
-	  year		=	{2021}
+	@article{labussiere2022calibration
+	  title		=	{Leveraging blur information for plenoptic camera calibration},
+	  author	=	{Labussi{\`{e}}re, Mathieu and Teuli{\`{e}}re, C{\'{e}}line and Bernardin, Fr{\'{e}}d{\'{e}}ric and Ait-Aider, Omar},
+	  doi		=	{10.1007/s11263-022-01582-z},
+	  journal	=	{International Journal of Computer Vision},
+	  year		=	{2022},
+	  month		=	{may},
+	  number	=	{2012},
+	  pages		=	{1--23}
 	}
-
 
 License
 =======
